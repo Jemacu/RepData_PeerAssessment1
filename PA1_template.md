@@ -84,6 +84,7 @@ in the 'interval' or 'date' fields so only the 'steps' field needs to be assesse
 for missing values.)   
 
 ##### Fill in missing values
+For each time interval with a missing value, the average of available values for that time interval is used.
 
 
 ```r
