@@ -33,35 +33,44 @@ daysums <- aggregate(steps ~ date, data=activity_data, FUN=sum)
 hist(daysums$steps, breaks=10, main="Histogram of Steps/Day", xlab="average steps/day", ylim=c(0,25))
 ```
 
-##### Mean total steps per day:
+##### Average number of total steps per day:
 ```{r}
-#Calculate mean total steps per day
-mean(daysums$steps)
+#Calculate mean  and median total steps per day
+options(scipen=3) # this prevents R from converting the number to scientific notation
+meansteps <- round(mean(daysums$steps), 2)
+meansteps
+mediansteps <- median(daysums$steps)
+mediansteps
 ```
 
+The total mean steps per day is **`r meansteps`** and the median is **`r mediansteps`**.
+  
+
 ### What is the average daily activity pattern?
-##### Calculate the average steps for each 5 minute interval for all days:
+
 ```{r}
 #Calculate and plot the average steps for each 5 minute interval for all days
 interval_means <- aggregate(steps ~ interval, data=activity_data, FUN=mean)
 plot(interval_means, type="l", main="Average daily activity pattern")
 ```
-##### The 5-minute interval that, averaged across all days, has the maximum number of steps:
+
 ```{r}
-interval_means[interval_means$steps==max(interval_means$steps),"interval"]
+#Calculate the 5 minute interval with the highest average number of steps
+max_steps <- interval_means[interval_means$steps==max(interval_means$steps),"interval"]
+max_steps
 ```
+The 5-minute interval that, averaged across all days, has the maximum number of steps is interval **`r max_steps`**.
 
 ### Imputing missing values
 
-##### The total number of missing values:
 ```{r}
-nrow(activity_data[is.na(activity_data$steps),])
+# Calculate the total number of missing values
+NAcount <- nrow(activity_data[is.na(activity_data$steps),])
+NAcount
 ```
-(Note that exploratory analysis of the data shows there are no missing values
-in the 'interval' or 'date' fields so only the 'steps' field needs to be assessed
-for missing values.)   
+The total number of missing values is **`r NAcount`**.   
 
-##### Fill in missing values
+##### Fill in missing values:
 For each time interval with a missing value, the average of available values for that time interval is used.
 
 ```{r}
@@ -76,15 +85,23 @@ activity_data_dt$steps <- ifelse(is.na(activity_data_dt$steps), activity_data_dt
 daysums2 <- aggregate(steps ~ date, data=activity_data_dt, FUN=sum, na.rm=TRUE)
 hist(daysums2$steps, breaks=10, main="Histogram of Steps/Day", xlab="average steps/day", ylim=c(0,25))
 ```
-##### Mean total steps/day:
+
 ```{r}
-mean(daysums2$steps)
+# Calculate mean steps per day with NAs replaced with imputed values 
+mean_steps_nna <- round(mean(daysums2$steps), 2)
+mean_steps_nna
 ```
-##### Median total steps/day:
+
 ```{r}
-median(daysums2$steps)
+# Calculate the median steps per day with NAs replaced with imputed values 
+median_steps_nna <- round(median(daysums2$steps), 2)
+median_steps_nna
 ```
-After adding the imputed values, the total steps per day increases for days that had missing values. However, since the missing values for each interval are the average of available values, the mean values do not change.
+
+The mean steps per day after missing values have been replaced with imputed values is **`r mean_steps_nna`** and the median is also **`r median_steps_nna`**.
+
+Even though the total number of steps is increased, since the missing values for each interval are the average of available values, the mean value does not change.  
+The median value changes to the mean value because all of the days that had missing values were missing all values and therefore ended up having the mean value as their total steps/day.
 
 ### Are there differences in activity patterns between weekdays and weekends?
 ```{r}
@@ -106,4 +123,6 @@ plot(weekday_avs, type="l", main="Weekday", xlab="Interval", ylab="")
 mtext("Number of Steps", side=2, outer=TRUE)
 ```
 
-There definitely appear to be differences in the weekday pattern compared to the weekend. For example, on weekdays time intervals between roughly 500 and 800 all have average step counts near 50 or higher but on the weekend the same time intervals have counts much lower than 50 but gradually increasing with time. On the other hand, time intervals between roughly 1000 and 2000 mostly have much higher counts for the weekend than during the week.
+There definitely appear to be differences in the weekday pattern compared to the weekend. For example, on weekdays, time intervals between roughly 500 and 800 all have average step counts near 50 or higher but on the weekend, the same time intervals have counts starting very low and gradually increasing over the (roughly) 300 hundred time intervals.  
+On the other hand, time intervals between roughly 1000 and 2000 mostly have much higher counts for the weekend than during the week as well as a larger range of values.  
+Both have a spike with highest values around the 835th interval but the spike is quite a bit higher for the weekdays (~230 steps) than weekends (~167 steps).
